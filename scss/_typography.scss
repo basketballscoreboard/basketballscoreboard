@@ -1,0 +1,93 @@
+body,
+html {
+    height: 100%;
+}
+
+*, *:after, *:before {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: .75vw;
+}
+
+body {
+    background: $background;
+    color: #FFF;
+    font-size: 2rem;
+    line-height: 1;
+    font-family: 'Share Tech Mono', monospace;
+}
+
+small {
+    font-size: .5em;
+}
+
+*:focus {
+    outline: none;
+}
+
+a {
+    color: #FFF;
+    text-decoration: none;
+}
+
+input {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    color: inherit;
+    background: none transparent;
+    font-size: inherit;
+    text-align: center;
+    line-height: 1;
+    font-family: inherit;
+    font-weight: inherit;
+
+    &[type=text] {
+        border-bottom: 2px solid transparent;
+        &:focus {
+            border-bottom: 2px solid #FFF;
+        }
+        &:disabled {
+            border-bottom: 0;
+        }
+    }
+}
+
+button {
+    border: 0;
+    padding: .4em .2em;
+    margin: 0;
+    color: inherit;
+    background: none transparent;
+    font-size: inherit;
+    text-align: center;
+    border-radius: .3rem;
+    cursor: pointer;
+    line-height: 1;
+    font-family: inherit;
+    font-weight: inherit;
+
+    &:disabled {
+        opacity: .2;
+        cursor: default;
+    }
+}
+
+select {
+    border: 0;
+    padding: .4em .2em;
+    margin: 0;
+    font-family: inherit;
+    font-weight: inherit;
+    background: $color3 url(../images/caret-down.svg) no-repeat right;
+    background-size: 2rem 2rem;
+    color: #FFF;
+    font-size: inherit;
+    width: 100%;
+    max-width: 100%;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}

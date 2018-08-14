@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Control Board</title>
+	<link href="css/controlboard.css" media="screen, projection" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" href="fontawesome/css/all.min.css" crossorigin="anonymous">
+</head>
+<body>
+
+<script src="js/helper.js"></script>
+<script src="js/vue.min.js"></script>
+<script src="js/easytimer.min.js"></script>
+
+<div class="container" id="controlboard">
+    <div class="controls">
+        <select v-model="game.period">
+            <option value="0">Start of game</option>
+            <option value="1">1st Period</option>
+            <option value="2">2nd Period</option>
+            <option value="3">3th Period</option>
+            <option value="4">4th Period</option>
+            <option value="5">Extra Period</option>
+        </select>
+        <button id="buzzer" v-on:click="horn"><i class="fa fa-volume-up"></i> Buzzer</button>
+        <button id="reset" v-on:click="reset" v-bind:disabled="!game.events.length"><i class="fa fa-trash-alt"></i> Reset</button>
+        <button id="reset" v-on:click="showScoreBoard"><i class="fa fa-expand"></i> Show Score Board</button>
+    </div>
+    <div class="game-header-container">
+        <div class="team home">
+            <span class="name"><input type="text" v-model="game.home.name"></span>
+            <span class="score"><input type="text" v-model="getScore('home')" disabled /></span>
+        </div>
+        <div id="timer" v-bind:class="{ running: game.clock.isRunning }">
+            <input type="text" id="minutes" maxlength="2" v-model.number="game.clock.minutes" v-bind:disabled="game.clock.isRunning">
+            <span class="separator">:</span>
+            <input type="text" id="seconds" maxlength="2" v-model.number="game.clock.seconds" v-bind:disabled="game.clock.isRunning">
+            <span class="separator">.</span>
+            <input type="text" id="tenths" maxlength="1" v-model.number="game.clock.secondTenths" v-bind:disabled="game.clock.isRunning">
+        </div>
+        <div class="team away">
+            <span class="name"><input type="text" v-model="game.away.name"></span>
+            <span class="score"><input type="text" v-model="getScore('away')" disabled /></span>
+        </div>
+    </div>
+    <div class="events-container">
+        <div class="team home">
+            <fieldset class="scores">
+                <legend>Scores</legend>
+                <div>
+                    <button v-on:click="addScore('home', 1)" v-bind:disabled="game.period == '0'">+1</button>
+                    <button v-on:click="addScore('home', 2)" v-bind:disabled="game.period == '0'">+2</button>
+                    <button v-on:click="addScore('home', 3)" v-bind:disabled="game.period == '0'">+3</button>
+                </div>
+            </fieldset>
+            <fieldset class="timeouts">
+                <legend>Time outs ({{getTimeouts('home')}})</legend>
+                <div>
+                    <button v-on:click="addTimeout('home')" v-bind:disabled="game.period == '0' || game.clock.isRunning || (timeoutLimit > 0 && getTimeouts('home') >= timeoutLimit)">
+                        Time Out
+                        <span v-show="game.clock.isRunning && game.clock.type === 'timeout'">(ESC)</span>
+                    </button>
+                </div>
+            </fieldset>
+            <fieldset class="fouls">
+                <legend>Team fouls ({{getTeamFouls('home')}})</legend>
+                <div>
+                    <button v-on:click="addTeamFoul('home', 'personal')" v-bind:disabled="game.period == '0' || game.clock.isRunning">Personal</button>
+                    <button v-on:click="addTeamFoul('home', 'technical')" v-bind:disabled="game.period == '0' || game.clock.isRunning">Technical</button>
+                    <button v-on:click="addTeamFoul('home', 'unsportsmanlike')" v-bind:disabled="game.period == '0' || game.clock.isRunning">Unsportsmanlike</button>
+                    <button v-on:click="addTeamFoul('home', 'disqualifying')" v-bind:disabled="game.period == '0' || game.clock.isRunning">Disqualifying</button>
+                </div>
+            </fieldset>
+            <fieldset class="players">
+                <legend>Players</legend>
+                <div>
+                    <button v-for="player in game.home.players" v-show="game.period != '0' && player.number != ''" v-bind:disabled="!enrichEventAvailable('home') || playerIsDisabled('home', player.number)" v-on:click="enrichEvent(player.number)" v-bind:class="{'disabled': playerIsDisabled('home', player.number)}">
+                        <div>#{{player.number}}</div>
+                        <small v-for="foul in getPlayerFouls('home', player.number)" class="fa active" v-bind:class="{'fa-circle': foul.message == 'Personal Foul', 'fa-times-circle': foul.message != 'Personal Foul'}"></small><small v-for="foul in (5 - getPlayerFouls('home', player.number).length)" class="fa fa-circle"></small>
+                    </button>
+                    <div v-for="player in game.home.players" v-show="game.period == '0'">
+                        <input type="text" pattern="[0-9]{1,2}" v-model="player.number" placeholder="#" />
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset class="other">
+                <legend>Other Fouls</legend>
+                <div>
+                    <button v-on:click="addFightingFoul('home')" v-bind:disabled="game.period == '0' || game.clock.isRunning">Fighting Foul</button>
+                </div>
+            </fieldset>
+        </div>
+
+
+        <div class="events">
+            <ul id="events_container">
+                <li v-for="event in reversedEvents" v-bind:class="[{active: activeEvent == event.id}, event.team, event.type]">
+                    <div class="event-item" v-on:click="activeEvent = event.id">
+                        <span class="time">{{event.time}}</span>
+                        <div class="msg">{{event.message}}</div>
+                        <span class="player" v-show="event.player && event.player != ''">{{event.player}}</span>
+                        <span class="no-player fa fa-exclamation-triangle" v-show="!event.player"></span>
+                    </div>
+                    <button v-on:click="deleteEvent(event)" class="remove"><span class="fa fa-trash-alt"></span></button>
+                    <button v-on:click="switchEvent(event)" class="switch"><span class="fa" v-bind:class="{'fa-angle-double-right': event.team === 'home', 'fa-angle-double-left': event.team === 'away'}"></span></button>
+                </li>
+            </ul>
+        </div>
+
+
+        <div class="team away">
+            <fieldset class="scores">
+                <legend>Scores</legend>
+                <div>
+                    <button v-on:click="addScore('away', 1)" v-bind:disabled="game.period == '0'">+1</button>
+                    <button v-on:click="addScore('away', 2)" v-bind:disabled="game.period == '0'">+2</button>
+                    <button v-on:click="addScore('away', 3)" v-bind:disabled="game.period == '0'">+3</button>
+                </div>
+            </fieldset>
+            <fieldset class="timeouts">
+                <legend>Time outs ({{getTimeouts('away')}})</legend>
+                <div>
+                    <button v-on:click="addTimeout('away')" v-bind:disabled="game.period == '0' || game.clock.isRunning || (timeoutLimit > 0 && getTimeouts('away') >= timeoutLimit)">
+                        Time Out
+                        <span v-show="game.clock.isRunning && game.clock.type === 'timeout'">(ESC)</span>
+                    </button>
+                </div>
+            </fieldset>
+            <fieldset class="fouls">
+                <legend>Team fouls ({{getTeamFouls('away')}})</legend>
+                <div>
+                    <button v-on:click="addTeamFoul('away', 'personal')" v-bind:disabled="game.period == '0' || game.clock.isRunning">Personal</button>
+                    <button v-on:click="addTeamFoul('away', 'technical')" v-bind:disabled="game.period == '0' || game.clock.isRunning">Technical</button>
+                    <button v-on:click="addTeamFoul('away', 'unsportsmanlike')" v-bind:disabled="game.period == '0' || game.clock.isRunning">Unsportsmanlike</button>
+                    <button v-on:click="addTeamFoul('away', 'disqualifying')" v-bind:disabled="game.period == '0' || game.clock.isRunning">Disqualifying</button>
+                </div>
+            </fieldset>
+            <fieldset class="players">
+                <legend>Players</legend>
+                <div>
+                    <button v-for="player in game.away.players" v-show="game.period != '0' && player.number != ''" v-bind:disabled="!enrichEventAvailable('away') || playerIsDisabled('away', player.number)" v-on:click="enrichEvent(player.number)" v-bind:class="{'disabled': playerIsDisabled('away', player.number)}">
+                        <div>#{{player.number}}</div>
+                        <small v-for="foul in getPlayerFouls('away', player.number)" class="fa active" v-bind:class="{'fa-circle': foul.message == 'Personal Foul', 'fa-times-circle': foul.message != 'Personal Foul'}"></small><small v-for="foul in (5 - getPlayerFouls('away', player.number).length)" class="fa fa-circle"></small>
+                    </button>
+                    <div v-for="player in game.away.players" v-show="game.period == '0'">
+                        <input type="text" pattern="[0-9]{1,2}"  v-model="player.number" placeholder="#" />
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset class="other">
+                <legend>Other Fouls</legend>
+                <div>
+                    <button v-on:click="addFightingFoul('away')" v-bind:disabled="game.period == '0' || game.clock.isRunning">Fighting Foul</button>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+</div>
+
+<audio id="horn" preload="auto">
+  <source src="sounds/horn.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
+
+<audio id="outro" preload="auto">
+  <source src="sounds/outro.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
+
+<script src="js/defaultGame.js"></script>
+<script src="js/eventFilter.js"></script>
+<script src="js/controlboard.js"></script>
+
+</body>
+</html>

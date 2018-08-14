@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Score Board</title>
+	<link href="css/scoreboard.css" media="screen, projection" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" href="fontawesome/css/all.min.css" crossorigin="anonymous">
+</head>
+<body>
+
+<script src="js/helper.js"></script>
+<script src="js/vue.min.js"></script>
+<script src="js/easytimer.min.js"></script>
+
+<div id="scoreboard">
+    <div>
+        <fieldset class="score">
+            <legend>{{game.home.name}}</legend>
+            {{homeScore}}
+        </fieldset>
+        <div class="fouls">
+            <span v-for="foul in Math.min(homeTeamFouls, 5)" class="fa fa-circle active"></span><span v-for="foul in (5 - Math.min(homeTeamFouls, 5))" class="fa fa-circle"></span>
+        </div>
+    </div>
+    <div class="timer">
+        <fieldset>
+            <legend v-if="game.clock.type == 'timeout'">Time Out</legend>
+            <legend v-if="game.clock.type != 'timeout' && game.period == '0'">Start of game</legend>
+            <legend v-if="game.clock.type != 'timeout' && game.period == '1'">1st Period</legend>
+            <legend v-if="game.clock.type != 'timeout' && game.period == '2'">2nd Period</legend>
+            <legend v-if="game.clock.type != 'timeout' && game.period == '3'">3th Period</legend>
+            <legend v-if="game.clock.type != 'timeout' && game.period == '4'">4th Period</legend>
+            <legend v-if="game.clock.type != 'timeout' && game.period == '5'">Extra Period</legend>
+
+            <div class="time-container">
+                <div class="timeouts" v-show="timeoutLimit">
+                    <span v-for="timeout in Math.min(homeTimeouts, timeoutLimit)" class="fa fa-circle active"></span>
+                    <span v-for="timeout in (timeoutLimit - Math.min(homeTimeouts, timeoutLimit))" class="fa fa-circle"></span>
+                </div>
+                <div class="clock" v-bind:class="{'running': game.clock.isRunning}">
+                    <span v-show="minutes != '00'">{{minutes}}:</span>{{seconds}}<span v-show="minutes == '00'">.{{secondTenths}}</span>
+                </div>
+                <div class="timeouts" v-show="timeoutLimit">
+                    <span v-for="timeout in Math.min(awayTimeouts, timeoutLimit)" class="fa fa-circle active"></span>
+                    <span v-for="timeout in (timeoutLimit - Math.min(awayTimeouts, timeoutLimit))" class="fa fa-circle"></span>
+                </div>
+            </div>
+        </fieldset>
+        <div class="fouls">
+            <span>&nbsp;</span>
+        </div>
+    </div>
+    <div>
+        <fieldset class="score">
+            <legend>{{game.away.name}}</legend>
+            {{awayScore}}
+        </fieldset>
+        <div class="fouls">
+            <span v-for="foul in Math.min(awayTeamFouls, 5)" class="fa fa-circle active"></span><span v-for="foul in (5 - Math.min(awayTeamFouls, 5))" class="fa fa-circle"></span>
+        </div>
+    </div>
+    <div class="players-list">
+        <ul>
+            <li v-for="player in game.home.players" v-show="player.number != ''" v-bind:class="{'disabled': playerIsDisabled('home', player.number)}">
+                <strong>#{{player.number}}</strong>
+                <div class="fouls">
+                    <span v-for="foul in getPlayerFouls('home', player.number)" class="fa active" v-bind:class="{'fa-circle': foul.message == 'Personal Foul', 'fa-times-circle': foul.message != 'Personal Foul'}"></span><span v-for="foul in (5 - getPlayerFouls('home', player.number).length)" class="fa fa-circle"></span>
+                </div>
+                <div class="points">{{getPlayerScores('home', player.number)}}</div>
+            </li>
+        </ul>
+    </div>
+    <div class="empty-space">
+        <a href="javascript: showBoardInFullScreen();" class="fullScreen">
+            <span class="fa fa-expand"></span>
+            Full Screen
+        </a>
+    </div>
+    <div class="players-list">
+        <ul>
+            <li v-for="player in game.away.players" v-show="player.number != ''" v-bind:class="{'disabled': playerIsDisabled('away', player.number)}">
+                <strong>#{{player.number}}</strong>
+                <div class="fouls">
+                    <span v-for="foul in getPlayerFouls('away', player.number)" class="fa active" v-bind:class="{'fa-circle': foul.message == 'Personal Foul', 'fa-times-circle': foul.message != 'Personal Foul'}"></span><span v-for="foul in (5 - getPlayerFouls('away', player.number).length)" class="fa fa-circle"></span>
+                </div>
+                <div class="points">{{getPlayerScores('away', player.number)}}</div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script src="js/defaultGame.js"></script>
+<script src="js/eventFilter.js"></script>
+<script src="js/scoreboard.js"></script>
+
+<script type="text/javascript">
+function showBoardInFullScreen() {
+    var elem = document.getElementById('scoreboard');
+
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+    } else if (elem.mozRequestFullScreen) { /* Firefox */
+        elem.mozRequestFullScreen();
+    } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+        elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { /* IE/Edge */
+        elem.msRequestFullscreen();
+    }
+}
+</script>
+
+</body>
+</html>

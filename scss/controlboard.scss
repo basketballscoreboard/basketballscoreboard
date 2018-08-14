@@ -1,0 +1,372 @@
+@import "compass/reset";
+@import "fonts";
+@import "variables";
+@import "typography";
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    > * {
+        flex: 0 0 auto;
+    }
+}
+
+.controls {
+    display: flex;
+    background: $color2;
+    padding: .5rem;
+    font-size: 1.5rem;
+
+    > * {
+        flex: 1 1 0;
+        margin-left: .5rem;
+
+        &:first-child {
+            margin-left: 0;
+        }
+    }
+
+    button {
+        background: $color3;
+
+        &:hover {
+            background-color: tint($color3, 10);
+        }
+    }
+}
+
+.game-header-container {
+    display: flex;
+    background: $color2;
+    padding: 0 .5rem;
+
+    .team {
+        flex: 1 0 40%;
+        display: flex;
+        background: $colorHome;
+        border-radius: .3rem;
+
+        .name,
+        .timeouts,
+        .fouls,
+        .score {
+            padding: 10px;
+        }
+
+        .name {
+            flex: 1 1 100%;
+
+            input {
+                width: 100%;
+                text-align: left;
+            }
+        }
+
+        .timeouts,
+        .fouls,
+        .score {
+            flex: 1 0 0;
+            text-align: center;
+            white-space: nowrap;
+
+            input {
+                width: 1.5rem;
+            }
+        }
+        .timeouts input,
+        .fouls input {
+            background: rgba(0, 0, 0, .5);
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            line-height: 3rem;
+            font-size: 1.5rem;
+        }
+        .score input {
+            width: 4.5rem;
+        }
+
+        &.away {
+            flex-direction: row-reverse;
+            text-align: right;
+            background: $colorAway;
+
+            .name input {
+                width: 100%;
+                text-align: right;
+            }
+        }
+    }
+    #timer {
+        flex: 1 1 20%;
+        margin: 0 .5rem;
+        text-align: center;
+        font-size: 0;
+        background: $red;
+        font-weight: bold;
+        border-radius: .3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &.running {
+            background: none;
+        }
+
+        > * {
+            font-size: 2.5rem;
+        }
+
+        input {
+            display: inline;
+            width: 3.2rem;
+
+            &:last-child {
+                width: 1.6rem;
+            }
+        }
+    }
+}
+
+.events-container {
+    display: flex;
+    flex: 1 1 auto;
+    justify-content: space-between;
+
+    .team {
+        background: $color2;
+        flex: 0 0 30%;
+        padding: .5rem;
+        display: flex;
+        flex-direction: column;
+
+        > * {
+            flex: 0 0 auto;
+        }
+
+        fieldset {
+            border-top: .2rem solid rgba(255, 255, 255, .6);
+            padding-top: .5rem;
+
+            legend {
+                color: rgba(255, 255, 255, .6);
+                font-size: 1.5rem;
+                margin-left: 1rem;
+                padding: 0 .5rem;
+            }
+
+            > div {
+                display: flex;
+                flex-wrap: wrap;
+                margin-left: -.5rem;
+
+                > * {
+                    border-radius: .3rem;
+                    flex: 1 1 0;
+                    margin-left: .5rem;
+                    margin-bottom: .5rem;
+                    background: $color4;
+                    font-size: 1em;
+                    line-height: 1.25;
+                    width: 0;
+                    overflow: hidden;
+
+                    &:not(:disabled):hover {
+                        background-color: tint($color4, 10);
+                    }
+                }
+                > div {
+                    input {
+                        padding: .5rem;
+
+                        &::-moz-placeholder {
+                            color: rgba(255, 255, 255, .25);
+                        }
+                        &:-ms-input-placeholder {
+                            color: rgba(255, 255, 255, .25);
+                        }
+                        &::-webkit-input-placeholder {
+                            color: rgba(255, 255, 255, .25);
+                        }
+                        &:invalid {
+                            background-color: red;
+                        }
+                    }
+                }
+            }
+
+            &.scores {
+                font-size: 5rem;
+
+                > div > * {
+                    padding: .2em;
+                }
+            }
+
+            &.timeouts {
+
+            }
+
+            &.fouls {
+                > div > * {
+                    flex: 1 1 calc(50% - .5rem);
+                }
+            }
+
+            &.players {
+                > div > * {
+                    flex-basis: calc(25% - .5rem);
+                    flex-grow: 0;
+                    line-height: 1;
+
+                    input {
+                        width: 100%;
+                    }
+
+                    &.disabled {
+                        background: red;
+                    }
+
+                    small {
+                        font-size: .7em;
+                        margin: 0 .1rem;
+                    }
+
+                    .fa-circle {
+                        opacity: .2;
+
+                        &.active {
+                            opacity: 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .events {
+        flex: 1 0 auto;
+        overflow: scroll;
+        -webkit-overflow-scrolling: touch;
+        padding: 1rem 0;
+
+        ul {
+            margin: 1rem 0 0;
+
+            li {
+                padding: 1rem;
+                position: relative;
+                display: flex;
+                align-items: center;
+
+                .event-item {
+                    background-color: $color4;
+                    border-radius: .4rem;
+                    display: flex;
+                    align-items: center;
+                    padding: 1rem;
+                    flex: 0 0 70%;
+
+                    .msg {
+                        flex: 1 0 auto;
+                    }
+
+                    .no-player {
+                        width: 3rem;
+                        height: 3rem;
+                        line-height: 3rem;
+                        text-align: center;
+                        font-size: 2rem;
+                    }
+
+                    .player {
+                        background: #FFF;
+                        color: $color4;
+                        width: 3rem;
+                        height: 3rem;
+                        font-size: 2rem;
+                        line-height: 3rem;
+                        text-align: center;
+                        border-radius: 50%;
+                        display: inline-block;
+                    }
+                }
+
+                &.home {
+                    .event-item {
+                        background-color: $colorHome;
+                        flex-direction: row-reverse;
+                        margin-right: .5rem;
+
+                        .no-player {
+                            margin-right: .5rem;
+                        }
+                        .player {
+                            margin-right: .5rem;
+                            color: $colorHome;
+                        }
+                    }
+
+                    button {
+                        margin-left: .5rem;
+
+                        &.switch {
+                            background-color: $colorAway;
+                        }
+                    }
+                }
+
+                &.away {
+                    flex-direction: row-reverse;
+
+                    .event-item {
+                        background-color: $colorAway;
+                        text-align: right;
+                        margin-left: .5rem;
+
+                        .no-player {
+                            margin-left: .5rem;
+                        }
+                        .player {
+                            margin-left: .5rem;
+                            color: $colorAway;
+                        }
+                    }
+
+                    button {
+                        margin-right: .5rem;
+
+                        &.switch {
+                            background-color: $colorHome;
+                        }
+                    }
+                }
+
+                button {
+                    display: none;
+                    padding: 0;
+                    border-radius: 100%;
+                    overflow: hidden;
+                    width: 3rem;
+                    height: 3rem;
+                    font-size: 1.5rem;
+                    border: .3rem solid #FFF;
+
+                    &.remove {
+                        background-color: red;
+                    }
+                }
+
+                &.active {
+                    background: $color2;
+
+                    button {
+                        display: block;
+                    }
+                }
+            }
+        }
+    }
+}
