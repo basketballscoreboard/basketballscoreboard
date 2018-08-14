@@ -100,7 +100,7 @@
                     <div class="event-item" v-on:click="activeEvent = event.id">
                         <span class="time">{{event.time}}</span>
                         <div class="msg">{{event.message}}</div>
-                        <span class="player" v-show="event.player && event.player != ''">{{event.player}}</span>
+                        <span class="player" v-show="event.type != 'timeout' && event.player && event.player != ''">{{event.player}}</span>
                         <span class="no-player fa fa-exclamation-triangle" v-show="!event.player"></span>
                     </div>
                     <button v-on:click="deleteEvent(event)" class="remove"><span class="fa fa-trash-alt"></span></button>
