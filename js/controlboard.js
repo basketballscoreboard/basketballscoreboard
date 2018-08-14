@@ -34,7 +34,12 @@ let sound = {
     },
     endTimeOut: function () {
         let audio = document.getElementById('outro');
+        audio.currentTime = 0;
         audio.play();
+    },
+    stopEndTimeOut: function () {
+        let audio = document.getElementById('outro');
+        audio.pause();
     }
 };
 
@@ -192,8 +197,8 @@ let app = new Vue({
 
             this.game.clock.oldData = oldData;
             this.game.clock.type = 'timeout';
-            this.game.clock.minutes = 0;
-            this.game.clock.seconds = 15;
+            this.game.clock.minutes = 1;
+            this.game.clock.seconds = 0;
             this.game.clock.secondTenths = 0;
             gameClock.toggle();
         },
@@ -226,6 +231,7 @@ let app = new Vue({
                         && this.game.clock.type == 'timeout'
                     ) {
                         gameClock.toggle();
+                        sound.stopEndTimeOut();
                         this.game.clock = this.game.clock.oldData;
                     }
                     break;
